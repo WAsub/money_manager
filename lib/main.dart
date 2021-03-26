@@ -106,12 +106,13 @@ class _MoneyManagementState extends State<MoneyManagement> {
                 }
                 // 非同期処理完了
                 int correct = now.day <= config[0].deadline ? 1 : 2;
+                int paymentMonth = DateTime(now.year,now.month+correct).month;
                 return Column(
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: <Widget>[
                       /** 月選択 */
                       Container(
-                        height: deviceHeight * 0.05,
+                        height: deviceHeight * 0.06,
                         decoration: BoxDecoration(
                             color: Theme.of(context).selectedRowColor,
                             border: Border(bottom: BorderSide(color: Colors.white, width: 1,))
@@ -134,8 +135,9 @@ class _MoneyManagementState extends State<MoneyManagement> {
                                   Container(
                                     width: deviceWidth * 0.11,
                                     child: Text(
-                                      (DateTime(now.year,now.month-1).month).toString()+"月",
-                                      style: TextStyle(fontSize: deviceHeight * 0.025),
+                                      "前月",
+                                      // (DateTime(now.year,now.month-1).month).toString()+"月",
+                                      style: TextStyle(fontSize: deviceHeight * 0.0225),
                                       textAlign: TextAlign.left,
                                     ),
                                   ),
@@ -145,10 +147,20 @@ class _MoneyManagementState extends State<MoneyManagement> {
                             /** 表示中の月 */
                             Container(
                                 width: deviceWidth * 0.78 - deviceHeight * 0.1,
-                                alignment: Alignment.center,
-                                child: Text(
-                                  (DateTime(now.year,now.month+correct).month).toString()+"月"+config[0].paymentDate.toString()+"日支払い分",
-                                  style: TextStyle(fontSize: deviceHeight * 0.025, fontStyle: FontStyle.italic, color: Colors.white, ),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: <Widget>[
+                                    Text(
+                                      paymentMonth.toString()+"月"+config[0].paymentDate.toString()+"日支払い分",
+                                      style: TextStyle(fontSize: deviceHeight * 0.025, fontStyle: FontStyle.italic, color: Colors.white, ),
+                                    ),
+                                    Text(
+                                      "("+(paymentMonth-2).toString()+"月"+(config[0].deadline+1).toString()+"日〜"+
+                                          (paymentMonth-1).toString()+"月"+(config[0].deadline).toString()+"日)",
+                                      style: TextStyle(fontSize: deviceHeight * 0.02, fontStyle: FontStyle.italic, color: Colors.white, ),
+                                    ),
+                                  ]
                                 ),
                             ),
                             /** 来月へ */
@@ -166,8 +178,9 @@ class _MoneyManagementState extends State<MoneyManagement> {
                                     Container(
                                       width: deviceWidth * 0.11,
                                       child: Text(
-                                        (DateTime(now.year,now.month+1).month).toString()+"月",
-                                        style: TextStyle(fontSize: deviceHeight * 0.025),
+                                        "次月",
+                                        // (DateTime(now.year,now.month+1).month).toString()+"月",
+                                        style: TextStyle(fontSize: deviceHeight * 0.0225),
                                         textAlign: TextAlign.right,
                                       ),
                                     ),
@@ -179,18 +192,26 @@ class _MoneyManagementState extends State<MoneyManagement> {
                         ),
                       ),
                       /** 合計金額 */
-                      Container(
-                          color: Theme.of(context).selectedRowColor,
-                          alignment: Alignment.centerRight,
-                          height: deviceHeight * 0.08,
-                          child: Text(
-                            totalMoney.toString() + '円',
-                            style: TextStyle(fontSize: deviceHeight * 0.045, color: Colors.white),
-                          )
+                      Stack(
+                          children: [
+                            Container(
+                                color: Theme.of(context).selectedRowColor,
+                                alignment: Alignment.centerRight,
+                                height: deviceHeight * 0.08,
+                                child: Text(
+                                  totalMoney.toString() + '円',
+                                  style: TextStyle(fontSize: deviceHeight * 0.045, color: Colors.white),
+                                )
+                            ),
+                            // Text(
+                            //   (DateTime(now.year,now.month+correct).month).toString()+"月"+config[0].paymentDate.toString()+"日支払い分",
+                            //   style: TextStyle(fontSize: deviceHeight * 0.025, fontStyle: FontStyle.italic, color: Colors.white, ),
+                            // ),
+                          ]
                       ),
                       /** ListView */
                       Container(
-                        height: deviceHeight * 0.87,
+                        height: deviceHeight * 0.86,
                         child: ListView.separated(
                           itemCount: _moneyList.length,
                           itemBuilder: (context, index){
