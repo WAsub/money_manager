@@ -109,27 +109,88 @@ class _MoneyManagementState extends State<MoneyManagement> {
                 return Column(
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: <Widget>[
-                      /** 合計金額 */
-                      Stack(
-                        children: [
-                          Container(
+                      /** 月選択 */
+                      Container(
+                        height: deviceHeight * 0.05,
+                        decoration: BoxDecoration(
                             color: Theme.of(context).selectedRowColor,
-                            alignment: Alignment.centerRight,
-                            height: deviceHeight * 0.08,
-                            child: Text(
-                              totalMoney.toString() + '円',
-                              style: TextStyle(fontSize: deviceHeight * 0.045, color: Colors.white),
-                            )
-                          ),
-                          Text(
-                            (DateTime(now.year,now.month+correct).month).toString()+"月"+config[0].paymentDate.toString()+"日支払い分",
-                            style: TextStyle(fontSize: deviceHeight * 0.025, fontStyle: FontStyle.italic, color: Colors.white, ),
-                          ),
-                        ]
+                            border: Border(bottom: BorderSide(color: Colors.white, width: 1,))
+                        ),
+                        child: Row(
+                          children: <Widget>[
+                            /** 前月へ */
+                            InkWell(
+                              onTap: () async{
+                                now = DateTime(now.year,now.month-1);
+                                List<Money> moneys = await SQLite.getMoneys(now.year, now.month, now.day);
+                                moneys = await SQLite.getImages(moneys);
+                                setState(() {
+                                  _moneyList = moneys;
+                                });
+                              },
+                              child: Row(
+                                children: <Widget>[
+                                  Icon(Icons.arrow_left, size: deviceHeight * 0.05,),
+                                  Container(
+                                    width: deviceWidth * 0.11,
+                                    child: Text(
+                                      (DateTime(now.year,now.month-1).month).toString()+"月",
+                                      style: TextStyle(fontSize: deviceHeight * 0.025),
+                                      textAlign: TextAlign.left,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            /** 表示中の月 */
+                            Container(
+                                width: deviceWidth * 0.78 - deviceHeight * 0.1,
+                                alignment: Alignment.center,
+                                child: Text(
+                                  (DateTime(now.year,now.month+correct).month).toString()+"月"+config[0].paymentDate.toString()+"日支払い分",
+                                  style: TextStyle(fontSize: deviceHeight * 0.025, fontStyle: FontStyle.italic, color: Colors.white, ),
+                                ),
+                            ),
+                            /** 来月へ */
+                            InkWell(
+                                onTap: () async{
+                                  now = DateTime(now.year,now.month+1);
+                                  List<Money> moneys = await SQLite.getMoneys(now.year, now.month, now.day);
+                                  moneys = await SQLite.getImages(moneys);
+                                  setState(() {
+                                    _moneyList = moneys;
+                                  });
+                                },
+                                child: Row(
+                                  children: <Widget>[
+                                    Container(
+                                      width: deviceWidth * 0.11,
+                                      child: Text(
+                                        (DateTime(now.year,now.month+1).month).toString()+"月",
+                                        style: TextStyle(fontSize: deviceHeight * 0.025),
+                                        textAlign: TextAlign.right,
+                                      ),
+                                    ),
+                                    Icon(Icons.arrow_right, size: deviceHeight * 0.05,),
+                                  ],
+                                )
+                            ),
+                          ],
+                        ),
+                      ),
+                      /** 合計金額 */
+                      Container(
+                          color: Theme.of(context).selectedRowColor,
+                          alignment: Alignment.centerRight,
+                          height: deviceHeight * 0.08,
+                          child: Text(
+                            totalMoney.toString() + '円',
+                            style: TextStyle(fontSize: deviceHeight * 0.045, color: Colors.white),
+                          )
                       ),
                       /** ListView */
                       Container(
-                        height: deviceHeight * 0.92,
+                        height: deviceHeight * 0.87,
                         child: ListView.separated(
                           itemCount: _moneyList.length,
                           itemBuilder: (context, index){
