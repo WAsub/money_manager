@@ -3,6 +3,7 @@ import 'dart:io';
 import 'dart:convert';
 import 'package:image_picker/image_picker.dart';
 import 'package:multi_image_picker/multi_image_picker.dart';
+import 'package:money_manager/main.dart';
 import 'package:money_manager/sqlite.dart';
 import 'package:money_manager/processing.dart';
 
@@ -100,6 +101,14 @@ class _AddState extends State<Add> {
                         ),
                       ],
                     ),
+                    Container(
+                      color: Theme.of(context).selectedRowColor,
+                      alignment: Alignment.center,
+                      child: Text(
+                        config[widget.money.cid].cardName,
+                        style: TextStyle(fontSize: deviceHeight * 0.03,),
+                      ),
+                    ),
                     /** 日付ドロップダウンリスト */
                     _dropdownDate(),
                     /** 金額入力 */
@@ -111,7 +120,7 @@ class _AddState extends State<Add> {
                           width: deviceWidth - deviceHeight * 0.05,
                           child: TextField(
                             controller: myController,
-                            decoration: new InputDecoration(labelText: "金額を入力してください。"),
+                            decoration: new InputDecoration(labelText: "金額を入力してください。", labelStyle: TextStyle(fontSize: deviceHeight * 0.02,),),
                             style: TextStyle(fontSize: deviceHeight * 0.04,),
                             textAlign: TextAlign.right,
                             keyboardType: TextInputType.number,
@@ -129,11 +138,16 @@ class _AddState extends State<Add> {
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: [
                         FlatButton(
+                          color: Theme.of(context).accentColor,
+                          padding: EdgeInsets.all(10),
+                          minWidth: deviceWidth * 0.20,
+                          child: Icon(Icons.check),
                           onPressed: () async{
                             Money _money = Money(
                                 image: _images,
                                 money: myController.text == "" ? 0 : int.parse(myController.text),
-                                date: _year.toString()+'-'+processing.doubleDigit(_month)+'-'+processing.doubleDigit(_days)
+                                date: _year.toString()+'-'+processing.doubleDigit(_month)+'-'+processing.doubleDigit(_days),
+                                cid: widget.money.cid
                             );
                             if(widget.money.id == 0){
                               await SQLite.insertMoney(_money);
@@ -143,9 +157,6 @@ class _AddState extends State<Add> {
                             }
                             Navigator.pop(context);
                           },
-                          color: Theme.of(context).accentColor,
-                          padding: EdgeInsets.all(5),
-                          child: Icon(Icons.check),
                         )
                       ],
                     ),

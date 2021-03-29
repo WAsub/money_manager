@@ -8,20 +8,31 @@ class SetLine extends StatefulWidget {
 }
 
 class _SetLineState extends State<SetLine> {
-  TextEditingController myController1;
-  TextEditingController myController2;
+  List<TextEditingController> deadlineController = [];
+  List<TextEditingController> paymentDateController = [];
+  // TextEditingController myController1;
+  // TextEditingController myController2;
 
   @override
   void dispose() {
-    myController1.dispose();
-    myController2.dispose();
+    // myController1.dispose();
+    // myController2.dispose();
+    for(int i = 1; i < config.length; i++){
+      deadlineController[i].dispose();
+      paymentDateController[i].dispose();
+    }
     super.dispose();
   }
   @override
   void initState() {
     super.initState();
-    myController1 = new TextEditingController(text: config[0].deadline.toString());
-    myController2 = new TextEditingController(text: config[0].paymentDate.toString());
+    // myController1 = new TextEditingController(text: config[0].deadline.toString());
+    // myController2 = new TextEditingController(text: config[0].paymentDate.toString());
+    deadlineController = [null,];paymentDateController = [null,];
+    for(int i = 1; i < config.length; i++){
+      deadlineController.add(new TextEditingController(text: config[i].deadline.toString()));
+      paymentDateController.add(new TextEditingController(text: config[i].paymentDate.toString()));
+    }
   }
   @override
   Widget build(BuildContext context) {
@@ -33,100 +44,135 @@ class _SetLineState extends State<SetLine> {
     return Scaffold(
       appBar: appBar,
       /******************************************************* AppBar*/
-      body: SingleChildScrollView(
-        reverse: true, // キーボード表示したら(画面が足りなくなったら)スクロール
-        child: GestureDetector(
-          onTap: () => FocusScope.of(context).unfocus(), // キーボード外の画面タップでキーボードを閉じる
-          child: Column(
-            children: <Widget>[
-              /** 締め日 */
-                Row(
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          double constraintsHeight = constraints.maxHeight;
+          double constraintsWidth = constraints.maxWidth;
+
+          return SingleChildScrollView(
+            reverse: true, // キーボード表示したら(画面が足りなくなったら)スクロール
+            child: GestureDetector(
+              onTap: () => FocusScope.of(context).unfocus(), // キーボード外の画面タップでキーボードを閉じる
+              child: Column(
                   children: <Widget>[
                     Container(
-                      width: deviceWidth * 0.1125,
-                      child: Icon(Icons.credit_card, color: Colors.black45,),
-                    ),
-                    Container(
-                      width: deviceWidth * 0.6375,
-                      height: deviceHeight * 0.08,
-                      alignment: Alignment.centerLeft,
-                      child: Text("締め日", style: TextStyle(fontSize: deviceHeight * 0.025,),
+                      height: constraintsHeight - 60,
+                      child: ListView.separated(
+                        itemCount: config.length,
+                        itemBuilder: (context, index) {
+                          if(index == 0){
+                            return Container(height: 0,
+                            );
+                          }
+                          return Column(
+                              children: <Widget>[
+                                /** 締め日 */
+                                Row(
+                                  children: <Widget>[
+                                    Container(
+                                      width: deviceWidth * 0.1125,
+                                      child: Icon(Icons.credit_card, color: Colors.black45,),
+                                    ),
+                                    Container(
+                                      width: deviceWidth * 0.6375,
+                                      height: deviceHeight * 0.08,
+                                      alignment: Alignment.centerLeft,
+                                      child: Text("締め日", style: TextStyle(fontSize: deviceHeight * 0.025,),
+                                      ),
+                                    ),
+                                    Container(
+                                      width: deviceWidth * 0.1,
+                                      height: deviceHeight * 0.035,
+                                      child: TextField(
+                                        controller: deadlineController[index],
+                                        style: TextStyle(fontSize: deviceHeight * 0.025,),
+                                        textAlign: TextAlign.right,
+                                        keyboardType: TextInputType.number,
+                                      ),
+                                    ),
+                                    Container(
+                                      width: deviceWidth * 0.15,
+                                      alignment: Alignment.centerLeft,
+                                      child: Text("日締め", style: TextStyle(fontSize: deviceHeight * 0.02,),),
+                                    ),
+                                  ],
+                                ),
+                                /** 支払日 */
+                                Row(
+                                  children: <Widget>[
+                                    Container(
+                                      width: deviceWidth * 0.1125,
+                                      child: Icon(Icons.credit_card, color: Colors.black45,),
+                                    ),
+                                    Container(
+                                      width: deviceWidth * 0.6375,
+                                      height: deviceHeight * 0.08,
+                                      alignment: Alignment.centerLeft,
+                                      child: Text("支払日", style: TextStyle(fontSize: deviceHeight * 0.025,),
+                                      ),
+                                    ),
+                                    Container(
+                                      width: deviceWidth * 0.1,
+                                      height: deviceHeight * 0.035,
+                                      child: TextField(
+                                        controller: paymentDateController[index],
+                                        style: TextStyle(fontSize: deviceHeight * 0.025,),
+                                        textAlign: TextAlign.right,
+                                        keyboardType: TextInputType.number,
+                                      ),
+                                    ),
+                                    Container(
+                                      width: deviceWidth * 0.15,
+                                      alignment: Alignment.centerLeft,
+                                      child: Text("日支払", style: TextStyle(fontSize: deviceHeight * 0.02,),),
+                                    ),
+                                  ],
+                                ),
+
+                              ]
+                          );
+                        },
+                        separatorBuilder: (context, index) {
+                          return Divider(height:3,);
+                        },
                       ),
                     ),
                     Container(
-                      width: deviceWidth * 0.1,
-                      height: deviceHeight * 0.035,
-                      child: TextField(
-                        controller: myController1,
-                        style: TextStyle(fontSize: deviceHeight * 0.025,),
-                        textAlign: TextAlign.right,
-                        keyboardType: TextInputType.number,
+                      height: 60,
+                      padding: EdgeInsets.all(5),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          FlatButton(
+                            minWidth: deviceWidth * 0.20,
+                            onPressed: () async{
+                              List<Setting> setting = [null,];
+                              for(int i = 1; i < config.length; i++){
+                                setting.add(Setting(id: config[i].id, cardName: config[i].cardName, cardOrder: config[i].cardOrder,
+                                  deadline: deadlineController[i].text == "" ? 30 : int.parse(deadlineController[i].text),
+                                  paymentDate: paymentDateController[i].text == "" ? 30 : int.parse(paymentDateController[i].text),
+                                ));
+                              }
+                              await SQLite.updateSetting(setting);
+                              Navigator.pop(context);
+                            },
+                            color: Theme.of(context).accentColor,
+                            padding: EdgeInsets.all(10),
+                            child: Icon(Icons.check),
+                          )
+                        ],
                       ),
                     ),
-                    Container(
-                      width: deviceWidth * 0.15,
-                      alignment: Alignment.centerLeft,
-                      child: Text("日締め", style: TextStyle(fontSize: deviceHeight * 0.025,),),
-                    ),
-                  ],
-                ),
-              /** 支払日 */
-              Row(
-                  children: <Widget>[
-                    Container(
-                      width: deviceWidth * 0.1125,
-                      child: Icon(Icons.credit_card, color: Colors.black45,),
-                    ),
-                    Container(
-                      width: deviceWidth * 0.6375,
-                      height: deviceHeight * 0.08,
-                      alignment: Alignment.centerLeft,
-                      child: Text("支払日", style: TextStyle(fontSize: deviceHeight * 0.025,),
-                      ),
-                    ),
-                    Container(
-                      width: deviceWidth * 0.1,
-                      height: deviceHeight * 0.035,
-                      child: TextField(
-                        controller: myController2,
-                        style: TextStyle(fontSize: deviceHeight * 0.025,),
-                        textAlign: TextAlign.right,
-                        keyboardType: TextInputType.number,
-                      ),
-                    ),
-                    Container(
-                      width: deviceWidth * 0.15,
-                      alignment: Alignment.centerLeft,
-                      child: Text("日支払", style: TextStyle(fontSize: deviceHeight * 0.025,),),
-                    ),
-                  ],
-                ),
-              Container(
-                padding: EdgeInsets.all(5),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    FlatButton(
-                      minWidth: deviceWidth * 0.20,
-                      onPressed: () async{
-                        Setting setting = Setting(
-                            deadline: myController1.text == "" ? 0 : int.parse(myController1.text),
-                            paymentDate: myController2.text == "" ? 0 : int.parse(myController2.text),
-                        );
-                        await SQLite.updateSetting(setting);
-                        Navigator.pop(context);
-                      },
-                      color: Theme.of(context).accentColor,
-                      padding: EdgeInsets.all(10),
-                      child: Icon(Icons.check),
-                    )
-                  ],
-                ),
+                  ]
               ),
-            ]
-          ),
-        ),
-      ),
+
+
+
+
+            ),
+          );
+        }
+        )
     );
   }
 }

@@ -7,8 +7,9 @@ class Money {
   List<String> image;
   int money;
   String date;
+  int cid;
 
-  Money({this.id, this.image, this.money, this.date});
+  Money({this.id, this.image, this.money, this.date, this.cid,});
 
   Map<String, dynamic> toMap() {
     return {
@@ -16,30 +17,38 @@ class Money {
       'image': image,
       'money': money,
       'date': date,
+      'cid': cid,
     };
   }
   @override
   String toString() {
-    return 'Memo{id: $id, image: $image, money: $money, date: $date}';
+    return 'Memo{id: $id, image: $image, money: $money, date: $date, cid: $cid}';
   }
 }
 class Setting {
+  int id;
+  String cardName;
+  int cardOrder;
   int deadline;
   int paymentDate;
 
-  Setting({this.deadline, this.paymentDate,});
+  Setting({this.id, this.cardName, this.cardOrder, this.deadline, this.paymentDate,});
 
   Map<String, dynamic> toMap() {
     return {
+      'id': id,
+      'cardName': cardName,
+      'cardOrder': cardOrder,
       'deadline': deadline,
       'paymentDate': paymentDate,
     };
   }
   @override
   String toString() {
-    return 'Memo{deadline: $deadline, paymentDate: $paymentDate}';
+    return 'Memo{id: $id, cardName: $cardName, cardOrder: $cardOrder, deadline: $deadline, paymentDate: $paymentDate}';
   }
 }
+
 
 class SQLite{
   static Future<Database> get database async {
@@ -50,36 +59,46 @@ class SQLite{
           "CREATE TABLE moneys("
               "id INTEGER PRIMARY KEY AUTOINCREMENT, "
               "money INTEGER, "
-              "date TEXT"
+              "date TEXT, "
+              "cid INTEGER"
               ")",
         );
         await db.execute(
           "CREATE TABLE images("
               "id INTEGER PRIMARY KEY AUTOINCREMENT, "
-              "fid INTEGER , "
-              "image TEXT)",
+              "fid INTEGER, "
+              "image TEXT"
+              ")",
         );
         await db.execute(
           "CREATE TABLE setting("
-              "deadline INTEGER , "
-              "paymentDate INTEGER)",
+              "id INTEGER PRIMARY KEY AUTOINCREMENT, "
+              "cardName TEXT, "
+              "cardOrder INTEGER, "
+              "deadline INTEGER, "
+              "paymentDate INTEGER"
+              ")",
         );
         await db.execute(
-          'INSERT INTO setting VALUES(15, 10)',
+          'INSERT INTO setting(cardName, cardOrder, deadline, paymentDate) VALUES("JCB", 1, 15, 10)',
+        );
+        await db.execute(
+          'INSERT INTO setting(cardName, cardOrder, deadline, paymentDate) VALUES("JCB2", 2, 15, 10)',
         );
         // テスト用
         await db.execute(
-          'INSERT INTO moneys(money, date) VALUES(1000, "2021-01-01")',
+          'INSERT INTO moneys(money, date, cid) VALUES(1000, "2021-04-01", 1)',
         );
         await db.execute(
-          'INSERT INTO moneys(money, date) VALUES(1000, "2021-01-03")',
+          'INSERT INTO moneys(money, date, cid) VALUES(1000, "2021-04-03", 1)',
         );
         await db.execute(
-          'INSERT INTO moneys(money, date) VALUES(257, "2021-01-03")',
+          'INSERT INTO moneys(money, date, cid) VALUES(257, "2021-04-03", 2)',
         );
         await db.execute(
-          'INSERT INTO moneys(money, date) VALUES(8000, "2021-01-07")',
+          'INSERT INTO moneys(money, date, cid) VALUES(8000, "2021-04-07", 2)',
         );
+
       },
       version: 1,
     );
@@ -87,37 +106,46 @@ class SQLite{
   }
 
   /// 金額リスト(日付順、ひと月分)取得用
-  static Future<List<Money>> getMoneys(int year, int month, int day) async {
+  static Future<List<List<Money>>> getMoneys(int year, int month, int day) async {
     // 設定を取得
     List<Setting> config = await getSetting();
     // 取得する期間を設定
     var ds;
     var de;
-    if(day <= config[0].deadline){
-      ds =  DateTime(year, month - 1);
-      de =  DateTime(year, month);
-    }else{
-      ds =  DateTime(year, month);
-      de =  DateTime(year, month + 1);
+    List<List<Money>> RElist = [];
+    for(int i = 0; i <= config.length; i++){
+      RElist.add([]);
     }
-    String Dstart = ds.year.toString()+'-'+processing.doubleDigit(ds.month)+'-'+(config[0].deadline+1).toString();
-    String Dend = de.year.toString()+'-'+processing.doubleDigit(de.month)+'-'+config[0].deadline.toString();
+    for(int j = 1; j < config.length; j++){
+      if(day <= config[j].deadline){
+        ds =  DateTime(year, month - 1);
+        de =  DateTime(year, month);
+      }else{
+        ds =  DateTime(year, month);
+        de =  DateTime(year, month + 1);
+      }
+      String Dstart = ds.year.toString()+'-'+processing.doubleDigit(ds.month)+'-'+processing.doubleDigit(config[j].deadline+1);
+      String Dend = de.year.toString()+'-'+processing.doubleDigit(de.month)+'-'+processing.doubleDigit(config[j].deadline);
 
-    final Database db = await database;
-    // リストを取得
-    final List<Map<String, dynamic>> maps_moneys = await db.rawQuery(
-        'SELECT * FROM moneys WHERE date >= "$Dstart" AND date <="$Dend" ORDER BY date'
-    );
-    List<Money> list = [];
-    for(int i = 0; i < maps_moneys.length; i++){
-      list.add( Money(
-            id: maps_moneys[i]['id'],
-            image: [],
-            money: maps_moneys[i]['money'],
-            date: maps_moneys[i]['date'],
-          ));
+      final Database db = await database;
+      // リストを取得
+      final List<Map<String, dynamic>> maps_moneys = await db.rawQuery(
+        'SELECT * FROM moneys WHERE (date >= ? AND date <= ?) AND cid = ? ORDER BY date',
+        [Dstart, Dend, config[j].id]
+      );
+      var a =0;
+      for(int i = 0; i < maps_moneys.length; i++){
+        RElist[config[j].cardOrder].add(Money(
+          id: maps_moneys[i]['id'],
+          image: [],
+          money: maps_moneys[i]['money'],
+          date: maps_moneys[i]['date'],
+          cid: maps_moneys[i]['cid'],
+        ));
+      }
+      RElist[config[j].cardOrder] = await getImages(RElist[config[j].cardOrder]);
     }
-    return list;
+    return RElist;
   }
   /// 写真リストを取得し、元リストに追加
   static Future<List<Money>> getImages(List<Money> Mlist) async {
@@ -135,15 +163,15 @@ class SQLite{
   static Future<List<Money>> getMaxMoneyID() async {
     final Database db = await database;
     final List<Map<String, dynamic>> maps_moneys = await db.rawQuery(
-        'SELECT MAX(id),money,date FROM moneys'
+        'SELECT MAX(id) FROM moneys'
     );
     List<Money> list = [];
     for(int i = 0; i < maps_moneys.length; i++){
       list.add( Money(
         id: maps_moneys[i]['MAX(id)'],
-        image: [],
-        money: maps_moneys[i]['money'],
-        date: maps_moneys[i]['date'],
+        // image: [],
+        // money: maps_moneys[i]['money'],
+        // date: maps_moneys[i]['date'],
       ));
     }
     return list;
@@ -153,8 +181,8 @@ class SQLite{
     final Database db = await database;
     // 金額を登録
     await db.rawInsert(
-        'INSERT INTO moneys(money, date) VALUES (?, ?)',
-        [money.money, money.date]
+        'INSERT INTO moneys(money, date, cid) VALUES (?, ?, ?)',
+        [money.money, money.date, money.cid]
     );
     if(money.image.length == 0) // 写真がなかったら後の処理は飛ばす
       return;
@@ -176,8 +204,8 @@ class SQLite{
   static Future<void> updateMoney(Money money) async {
     final db = await database;
     await db.rawUpdate(
-      'UPDATE moneys SET money = ?, date = ? WHERE id = ?',
-      [money.money, money.date, money.id]
+      'UPDATE moneys SET money = ?, date = ?, cid = ? WHERE id = ?',
+      [money.money, money.date, money.cid, money.id]
     );
     deleteImgs(money.id);
     insertImgs(money.id, money.image);
@@ -205,24 +233,30 @@ class SQLite{
   /// 設定取得用
   static Future<List<Setting>> getSetting() async {
     final Database db = await database;
-    final List<Map<String, dynamic>> maps = await db.query('setting');
-    List<Setting> list = [];
+    // final List<Map<String, dynamic>> maps = await db.query('setting');
+    final List<Map<String, dynamic>> maps = await db.rawQuery(
+        'SELECT * FROM setting ORDER BY cardOrder',
+    );
+    List<Setting> list = [null,];
     for(int i = 0; i < maps.length; i++){
       list.add( Setting(
+        id: maps[i]['id'],
+        cardName: maps[i]['cardName'],
+        cardOrder: maps[i]['cardOrder'],
         deadline: maps[i]['deadline'],
         paymentDate: maps[i]['paymentDate'],
       ));
     }
-
     return list;
   }
   /// 設定更新用
-  static Future<void> updateSetting(Setting config) async {
+  static Future<void> updateSetting(List<Setting> config) async {
     final db = await database;
-    await db.update(
-      'setting',
-      config.toMap(),
-      conflictAlgorithm: ConflictAlgorithm.fail,
-    );
+    for(int i = 1; i < config.length; i++){
+      await db.rawUpdate(
+          'UPDATE setting SET cardName = ?, cardOrder = ?, deadline = ?, paymentDate = ? WHERE id = ?',
+          [config[i].cardName, config[i].cardOrder, config[i].deadline, config[i].paymentDate, config[i].id,]
+      );
+    }
   }
 }
