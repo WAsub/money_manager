@@ -49,9 +49,9 @@ class _SetThemeState extends State<SetTheme> {
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.end,
                         children: <Widget>[
-                          Icon(Icons.stop_circle,color: MyColor.themeColor[index][1],),
-                          Icon(Icons.stop_circle,color: MyColor.themeColor[index][2],),
-                          Icon(Icons.stop_circle,color: MyColor.themeColor[index][3],),
+                          Icon(Icons.stop_circle,color: MyColor.themeColor[index][900],),
+                          Icon(Icons.stop_circle,color: MyColor.themeColor[index][500],),
+                          Icon(Icons.stop_circle,color: MyColor.themeColor[index][50],),
                         ],
                       ),
                     ),

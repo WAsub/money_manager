@@ -4,17 +4,17 @@ import 'package:money_manager/color.dart';
 class AppTheme {
   static ThemeData theme_rose() {
     return ThemeData(
-      primaryColor: MyColor.rose[1],
-      accentColor: MyColor.rose[2],
-      selectedRowColor: MyColor.rose[3],
+      primaryColor: MyColor.rose[900],
+      accentColor: MyColor.rose[500],
+      selectedRowColor: MyColor.rose[50],
       brightness: Brightness.light,
     );
   }
   static ThemeData theme_sky() {
     return ThemeData(
-      primaryColor: MyColor.sky[1],
-      accentColor: MyColor.sky[2],
-      selectedRowColor: MyColor.sky[3],
+      primaryColor: MyColor.sky[900],
+      accentColor: MyColor.sky[500],
+      selectedRowColor: MyColor.sky[50],
       brightness: Brightness.light,
     );
   }

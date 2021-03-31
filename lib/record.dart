@@ -171,6 +171,7 @@ class _RecordState extends State<Record> {
                           ),
                         ]
                     ),
+                    /** 追加画面へ */
                     Container(
                       alignment: Alignment.bottomRight,
                       padding: EdgeInsets.only(bottom: 34,right: 16,),
