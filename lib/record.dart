@@ -143,9 +143,14 @@ class _RecordState extends State<Record> {
                                       style: TextStyle(fontSize: deviceHeight * 0.045, color: Colors.white),
                                     )
                                 ),
-                                Text(
-                                  config[widget.nowid].cardName,
-                                  style: TextStyle(fontSize: deviceHeight * 0.025, fontStyle: FontStyle.italic, color: Colors.white, ),
+                                Row(
+                                  children: [
+                                    Icon(Icons.credit_card, color: cardColor[config[widget.nowid].cardColor],),
+                                    Text(
+                                      config[widget.nowid].cardName,
+                                      style: TextStyle(fontSize: deviceHeight * 0.025, fontStyle: FontStyle.italic, color: cardColor[config[widget.nowid].cardColor], ),
+                                    ),
+                                  ],
                                 ),
                               ]
                           ),

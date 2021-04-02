@@ -29,23 +29,25 @@ class Setting {
   int id;
   String cardName;
   int cardOrder;
+  int cardColor;
   int deadline;
   int paymentDate;
 
-  Setting({this.id, this.cardName, this.cardOrder, this.deadline, this.paymentDate,});
+  Setting({this.id, this.cardName, this.cardOrder, this.cardColor, this.deadline, this.paymentDate,});
 
   Map<String, dynamic> toMap() {
     return {
       'id': id,
       'cardName': cardName,
       'cardOrder': cardOrder,
+      'cardColor': cardColor,
       'deadline': deadline,
       'paymentDate': paymentDate,
     };
   }
   @override
   String toString() {
-    return 'Memo{id: $id, cardName: $cardName, cardOrder: $cardOrder, deadline: $deadline, paymentDate: $paymentDate}';
+    return 'Memo{id: $id, cardName: $cardName, cardOrder: $cardOrder, cardColor: $cardColor, deadline: $deadline, paymentDate: $paymentDate}';
   }
 }
 
@@ -75,15 +77,16 @@ class SQLite{
               "id INTEGER PRIMARY KEY AUTOINCREMENT, "
               "cardName TEXT, "
               "cardOrder INTEGER, "
+              "cardColor INTEGER, "
               "deadline INTEGER, "
               "paymentDate INTEGER"
               ")",
         );
         await db.execute(
-          'INSERT INTO setting(cardName, cardOrder, deadline, paymentDate) VALUES("JCB", 1, 15, 10)',
+          'INSERT INTO setting(cardName, cardOrder, cardColor, deadline, paymentDate) VALUES("JCB", 1, 0, 15, 10)',
         );
         await db.execute(
-          'INSERT INTO setting(cardName, cardOrder, deadline, paymentDate) VALUES("JCB2", 2, 15, 10)',
+          'INSERT INTO setting(cardName, cardOrder, cardColor, deadline, paymentDate) VALUES("JCB2", 2, 0, 15, 10)',
         );
         // テスト用
         await db.execute(
@@ -243,20 +246,46 @@ class SQLite{
         id: maps[i]['id'],
         cardName: maps[i]['cardName'],
         cardOrder: maps[i]['cardOrder'],
+        cardColor: maps[i]['cardColor'],
         deadline: maps[i]['deadline'],
         paymentDate: maps[i]['paymentDate'],
       ));
     }
     return list;
   }
-  /// 設定更新用
-  static Future<void> updateSetting(List<Setting> config) async {
+  /// 設定登録用
+  static Future<void> insertSetting(Setting config) async {
     final db = await database;
-    for(int i = 1; i < config.length; i++){
-      await db.rawUpdate(
-          'UPDATE setting SET cardName = ?, cardOrder = ?, deadline = ?, paymentDate = ? WHERE id = ?',
-          [config[i].cardName, config[i].cardOrder, config[i].deadline, config[i].paymentDate, config[i].id,]
-      );
-    }
+    int order = await countSetting() + 1;
+    await db.rawInsert(
+        'INSERT INTO setting(cardName, cardOrder, cardColor, deadline, paymentDate) VALUES (?, ?, ?, ?, ?)',
+        [config.cardName, order, config.cardColor, config.deadline, config.paymentDate,]
+    );
+  }
+  /// 設定削除用
+  static Future<void> deleteSetting(int id) async {
+    final db = await database;
+    await db.delete(
+      'setting',
+      where: "id = ?",
+      whereArgs: [id],
+    );
+  }
+  // カードの数取得用
+  static Future<int> countSetting() async {
+    final db = await database;
+    final List<Map<String, dynamic>> maps = await db.rawQuery(
+      'SELECT COUNT(id) FROM setting',
+    );
+    int reCnt = maps[0]['COUNT(id)'];
+    return reCnt;
+  }
+  /// 設定更新用
+  static Future<void> updateSetting(Setting config) async {
+    final db = await database;
+    await db.rawUpdate(
+      'UPDATE setting SET cardName = ?, cardOrder = ?, cardColor = ?, deadline = ?, paymentDate = ? WHERE id = ?',
+      [config.cardName, config.cardOrder, config.cardColor, config.deadline, config.paymentDate, config.id,]
+    );
   }
 }

@@ -37,19 +37,32 @@ class MyColor{
     },
   );
   static const int _BasicValue = 0xffffffff;
-  static const MaterialColor basic = MaterialColor(
-    _BasicValue,
-    <int, Color>{
-      50  : Color(0xff202020),
-      100 : Color(0xffffffff),
-      200 : Color(0xffaa56ff),
-      300 : Color(0xff56aaff),
-      400 : Color(0xff56ffff),
-      500 : Color(0xff56ffaa),
-      600 : Color(0xffaaff56),
-      700 : Color(0xffffff38),
-      800 : Color(0xffffaa56),
-      900 : Color(0xffff5656),
-    },
-  );
+  // static const MaterialColor basic = MaterialColor(
+  //   _BasicValue,
+  //   <int, Color>{
+  //     50  : Color(0xff202020),
+  //     100 : Color(0xffffffff),
+  //     200 : Color(0xffaa56ff),
+  //     300 : Color(0xff56aaff),
+  //     400 : Color(0xff56ffff),
+  //     500 : Color(0xff56ffaa),
+  //     600 : Color(0xffaaff56),
+  //     700 : Color(0xffffff38),
+  //     800 : Color(0xffffaa56),
+  //     900 : Color(0xffff5656),
+  //   },
+  // );
+  static List<Color> basic = [
+    Color(0xffff5656),
+    Color(0xffffaa56),
+    Color(0xffffff38),
+    Color(0xffaaff56),
+    Color(0xff56ffaa),
+    Color(0xff56ffff),
+    Color(0xff56aaff),
+    Color(0xffaa56ff),
+    Color(0xffffffff),
+    Color(0xff202020),
+  ];
+
 }

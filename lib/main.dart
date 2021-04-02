@@ -10,6 +10,7 @@ import 'package:money_manager/setTheme.dart';
 import 'package:money_manager/viewImg.dart';
 import 'package:money_manager/add.dart';
 import 'package:money_manager/editingCard.dart';
+import 'package:money_manager/color.dart';
 
 void main() {
   runApp(MyApp());
@@ -29,7 +30,8 @@ class MyApp extends StatelessWidget {
   }
 }
 
-List<Setting> config = [Setting(id: 0,cardName: "",cardOrder: 0,deadline: 0,paymentDate: 0)];
+List<Setting> config = [Setting(id: 0,cardName: "",cardOrder: 0,cardColor:  0,deadline: 0,paymentDate: 0)];
+List<Color> cardColor = [];
 
 class MoneyManagement extends StatefulWidget {
   @override
@@ -45,6 +47,12 @@ class _MoneyManagementState extends State<MoneyManagement> {
   Future<void> initializeDrawer() async { // 非同期処理
     config = await SQLite.getSetting();
     nowView = config[1].cardOrder;
+    cardColor = [];
+    cardColor.addAll(MyColor.basic);
+    cardColor.add(Theme.of(context).primaryColorDark);
+    cardColor.add(Theme.of(context).backgroundColor);
+    cardColor.add(Theme.of(context).focusColor);
+    cardColor.add(Theme.of(context).primaryColorLight);
 
     leadingIcon = [null,];titleText = [null,];onTap = [null,];
     for(int i = 2; i < config.length; i++){

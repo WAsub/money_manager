@@ -146,15 +146,15 @@ class _SetLineState extends State<SetLine> {
                           FlatButton(
                             minWidth: deviceWidth * 0.20,
                             onPressed: () async{
-                              List<Setting> setting = [null,];
-                              for(int i = 1; i < config.length; i++){
-                                setting.add(Setting(id: config[i].id, cardName: config[i].cardName, cardOrder: config[i].cardOrder,
-                                  deadline: deadlineController[i].text == "" ? 30 : int.parse(deadlineController[i].text),
-                                  paymentDate: paymentDateController[i].text == "" ? 30 : int.parse(paymentDateController[i].text),
-                                ));
-                              }
-                              await SQLite.updateSetting(setting);
-                              Navigator.pop(context);
+                              // List<Setting> setting = [null,];
+                              // for(int i = 1; i < config.length; i++){
+                              //   setting.add(Setting(id: config[i].id, cardName: config[i].cardName, cardOrder: config[i].cardOrder,
+                              //     deadline: deadlineController[i].text == "" ? 30 : int.parse(deadlineController[i].text),
+                              //     paymentDate: paymentDateController[i].text == "" ? 30 : int.parse(paymentDateController[i].text),
+                              //   ));
+                              // }
+                              // await SQLite.updateSetting(setting);
+                              // Navigator.pop(context);
                             },
                             color: Theme.of(context).accentColor,
                             padding: EdgeInsets.all(10),
