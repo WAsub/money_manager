@@ -20,11 +20,13 @@ class _EditMoneyState extends State<EditMoney> {
   int _year;
   int _month;
   int _days;
+  var memoController = TextEditingController();
   var moneyController = TextEditingController();
   String _error;
 
   @override
   void dispose() {
+    memoController.dispose();
     moneyController.dispose();
     super.dispose();
   }
@@ -35,6 +37,7 @@ class _EditMoneyState extends State<EditMoney> {
       _month = int.parse(widget.money.date.split('-')[1]);
       _days = int.parse(widget.money.date.split('-')[2]);
       _images.addAll(widget.money.image);
+      memoController = TextEditingController(text: widget.money.memo);
       moneyController = TextEditingController(text: widget.money.money.toString());
     }else{ // 追加の時は日時を今日の日付で初期化する
       _year = DateTime.now().year;
@@ -122,16 +125,28 @@ class _EditMoneyState extends State<EditMoney> {
                 ),
                 /** 日付ドロップダウンリスト */
                 _dropdownDate(),
+                /** メモ入力 */
+                Container(
+                  width: deviceWidth - 16,
+                  height: 65,
+                  child: TextField(
+                    controller: memoController,
+                    decoration: new InputDecoration(labelText: "メモ :", labelStyle: TextStyle(fontSize: deviceHeight * 0.02,),),
+                    style: TextStyle(fontSize: 18,),
+                    textAlign: TextAlign.left,
+                    keyboardType: TextInputType.text,
+                  ),
+                ),
                 /** 金額入力 */
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.end,
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: <Widget>[
                     Container(
-                      width: deviceWidth - deviceHeight * 0.05,
+                      width: deviceWidth - deviceHeight * 0.05 - 16 ,
                       child: TextField(
                         controller: moneyController,
-                        decoration: new InputDecoration(labelText: "金額を入力してください。", labelStyle: TextStyle(fontSize: deviceHeight * 0.02,),),
+                        decoration: new InputDecoration(labelText: "金額 :", labelStyle: TextStyle(fontSize: deviceHeight * 0.02,),),
                         style: TextStyle(fontSize: deviceHeight * 0.04,),
                         textAlign: TextAlign.right,
                         keyboardType: TextInputType.number,
@@ -157,6 +172,7 @@ class _EditMoneyState extends State<EditMoney> {
                         Money _money = Money(
                             image: _images,
                             money: moneyController.text == "" ? 0 : int.parse(moneyController.text),
+                            memo: memoController.text == "" ? "" : memoController.text.length <= 20 ? memoController.text : memoController.text.substring(0, 20),
                             date: _year.toString()+'-'+processing.doubleDigit(_month)+'-'+processing.doubleDigit(_days),
                             cid: widget.money.cid
                         );

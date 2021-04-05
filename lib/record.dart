@@ -267,9 +267,27 @@ class _RecordState extends State<Record> {
         width: deviceWidth,
         height: deviceHeight * 0.07,
         alignment: Alignment.centerRight,
-        child: Text(
-          money.money.toString() + '円',
-          style: TextStyle(fontSize: deviceHeight * 0.04,),
+        child: Stack(
+            children: <Widget>[
+              DefaultTextStyle(
+                style: new TextStyle(color: Colors.black),
+                overflow: TextOverflow.ellipsis,
+                maxLines: 1,
+                child: Container(
+                  alignment: Alignment.centerLeft,
+                  padding: EdgeInsets.only(left: 15,right: 15,),
+                  width: deviceWidth * 0.7,
+                  child: Text(money.memo, style: TextStyle(fontSize: 16,)),
+                ),
+              ),
+              Container(
+                alignment: Alignment.centerRight,
+                child: Text(
+                  money.money.toString() + '円',
+                  style: TextStyle(fontSize: deviceHeight * 0.04,),
+                ),
+              ),
+            ]
         ),
       ),
     );
@@ -312,6 +330,8 @@ class _RecordState extends State<Record> {
               ),
               // 日付
               Text(money.date, textAlign: TextAlign.left,),
+              // メモ
+              Container(child: Text(money.memo, style: TextStyle(fontSize: 20,)),),
               // 金額
               Container(
                 width: deviceWidth * 0.7,

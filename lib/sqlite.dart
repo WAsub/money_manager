@@ -6,23 +6,25 @@ class Money {
   int id;
   List<String> image;
   int money;
+  String memo;
   String date;
   int cid;
 
-  Money({this.id, this.image, this.money, this.date, this.cid,});
+  Money({this.id, this.image, this.money, this.memo, this.date, this.cid,});
 
   Map<String, dynamic> toMap() {
     return {
       'id': id,
       'image': image,
       'money': money,
+      'memo': memo,
       'date': date,
       'cid': cid,
     };
   }
   @override
   String toString() {
-    return 'Memo{id: $id, image: $image, money: $money, date: $date, cid: $cid}';
+    return 'Memo{id: $id, image: $image, money: $money, memo: $memo, date: $date, cid: $cid}';
   }
 }
 class Setting {
@@ -61,6 +63,7 @@ class SQLite{
           "CREATE TABLE moneys("
               "id INTEGER PRIMARY KEY AUTOINCREMENT, "
               "money INTEGER, "
+              "memo TEXT, "
               "date TEXT, "
               "cid INTEGER"
               ")",
@@ -83,24 +86,24 @@ class SQLite{
               ")",
         );
         await db.execute(
-          'INSERT INTO setting(cardName, cardOrder, cardColor, deadline, paymentDate) VALUES("JCB", 1, 0, 15, 10)',
+          'INSERT INTO setting(cardName, cardOrder, cardColor, deadline, paymentDate) VALUES("クレジットカード", 1, 10, 25, 10)',
         );
-        await db.execute(
-          'INSERT INTO setting(cardName, cardOrder, cardColor, deadline, paymentDate) VALUES("JCB2", 2, 0, 15, 10)',
-        );
+        // await db.execute(
+        //   'INSERT INTO setting(cardName, cardOrder, cardColor, deadline, paymentDate) VALUES("JCB2", 2, 0, 15, 10)',
+        // );
         // テスト用
-        await db.execute(
-          'INSERT INTO moneys(money, date, cid) VALUES(1000, "2021-04-01", 1)',
-        );
-        await db.execute(
-          'INSERT INTO moneys(money, date, cid) VALUES(1000, "2021-04-03", 1)',
-        );
-        await db.execute(
-          'INSERT INTO moneys(money, date, cid) VALUES(257, "2021-04-03", 2)',
-        );
-        await db.execute(
-          'INSERT INTO moneys(money, date, cid) VALUES(8000, "2021-04-07", 2)',
-        );
+        // await db.execute(
+        //   'INSERT INTO moneys(money, memo, date, cid) VALUES(1000, "aa", "2021-04-01", 1)',
+        // );
+        // await db.execute(
+        //   'INSERT INTO moneys(money, memo, date, cid) VALUES(1000, "aaa", "2021-04-03", 1)',
+        // );
+        // await db.execute(
+        //   'INSERT INTO moneys(money, memo, date, cid) VALUES(257, "d", "2021-04-03", 2)',
+        // );
+        // await db.execute(
+        //   'INSERT INTO moneys(money, memo, date, cid) VALUES(8000, "あf", "2021-04-07", 2)',
+        // );
 
       },
       version: 1,
@@ -141,6 +144,7 @@ class SQLite{
           id: maps_moneys[i]['id'],
           image: [],
           money: maps_moneys[i]['money'],
+          memo: maps_moneys[i]['memo'],
           date: maps_moneys[i]['date'],
           cid: maps_moneys[i]['cid'],
         ));
@@ -175,8 +179,8 @@ class SQLite{
     final Database db = await database;
     // 金額を登録
     await db.rawInsert(
-        'INSERT INTO moneys(money, date, cid) VALUES (?, ?, ?)',
-        [money.money, money.date, money.cid]
+        'INSERT INTO moneys(money, memo, date, cid) VALUES (?, ?, ?, ?)',
+        [money.money, money.memo, money.date, money.cid]
     );
     if(money.image.length == 0) // 写真がなかったら後の処理は飛ばす
       return;
@@ -198,8 +202,8 @@ class SQLite{
   static Future<void> updateMoney(Money money) async {
     final db = await database;
     await db.rawUpdate(
-      'UPDATE moneys SET money = ?, date = ?, cid = ? WHERE id = ?',
-      [money.money, money.date, money.cid, money.id]
+      'UPDATE moneys SET money = ?, memo = ?, date = ?, cid = ? WHERE id = ?',
+      [money.money, money.memo, money.date, money.cid, money.id]
     );
     deleteImgs(money.id);
     insertImgs(money.id, money.image);
