@@ -115,9 +115,9 @@ class SQLite{
     // 取得する期間を設定
     var ds;
     var de;
-    List<List<Money>> RElist = [];
+    List<List<Money>> list = [];
     for(int i = 0; i <= config.length; i++){
-      RElist.add([]);
+      list.add([]);
     }
     for(int j = 1; j < config.length; j++){
       if(day <= config[j].deadline){
@@ -136,9 +136,8 @@ class SQLite{
         'SELECT * FROM moneys WHERE (date >= ? AND date <= ?) AND cid = ? ORDER BY date',
         [Dstart, Dend, config[j].id]
       );
-      var a =0;
       for(int i = 0; i < maps_moneys.length; i++){
-        RElist[config[j].cardOrder].add(Money(
+        list[config[j].cardOrder].add(Money(
           id: maps_moneys[i]['id'],
           image: [],
           money: maps_moneys[i]['money'],
@@ -146,11 +145,11 @@ class SQLite{
           cid: maps_moneys[i]['cid'],
         ));
       }
-      RElist[config[j].cardOrder] = await getImages(RElist[config[j].cardOrder]);
+      list[config[j].cardOrder] = await getImages(list[config[j].cardOrder]);
     }
-    return RElist;
+    return list;
   }
-  /// 写真リストを取得し、元リストに追加
+  // 写真リストを取得し、元リストに追加
   static Future<List<Money>> getImages(List<Money> Mlist) async {
     final Database db = await database;
     final List<Map<String, dynamic>> maps_images = await db.query('images');
@@ -162,22 +161,14 @@ class SQLite{
     }
     return list;
   }
-  /// 最大ID取得用
-  static Future<List<Money>> getMaxMoneyID() async {
+  // 最大ID取得用
+  static Future<int> getMaxMoneyID() async {
     final Database db = await database;
-    final List<Map<String, dynamic>> maps_moneys = await db.rawQuery(
+    final List<Map<String, dynamic>> maps = await db.rawQuery(
         'SELECT MAX(id) FROM moneys'
     );
-    List<Money> list = [];
-    for(int i = 0; i < maps_moneys.length; i++){
-      list.add( Money(
-        id: maps_moneys[i]['MAX(id)'],
-        // image: [],
-        // money: maps_moneys[i]['money'],
-        // date: maps_moneys[i]['date'],
-      ));
-    }
-    return list;
+    int reMax = maps[0]['MAX(id)'];
+    return reMax;
   }
   /// 金額&写真登録用
   static Future<void> insertMoney(Money money) async {
@@ -190,10 +181,10 @@ class SQLite{
     if(money.image.length == 0) // 写真がなかったら後の処理は飛ばす
       return;
     // 写真を登録
-    var list = await getMaxMoneyID(); // さっき登録したID取得
-    insertImgs(list[0].id, money.image);
+    int maxID = await getMaxMoneyID(); // さっき登録したID取得
+    insertImgs(maxID, money.image);
   }
-  /// 写真登録用
+  // 写真登録用
   static Future<void> insertImgs(int id, List<String> imgs) async {
     final Database db = await database;
     for(int i = 0; i < imgs.length; i++){
@@ -236,7 +227,6 @@ class SQLite{
   /// 設定取得用
   static Future<List<Setting>> getSetting() async {
     final Database db = await database;
-    // final List<Map<String, dynamic>> maps = await db.query('setting');
     final List<Map<String, dynamic>> maps = await db.rawQuery(
         'SELECT * FROM setting ORDER BY cardOrder',
     );
@@ -262,15 +252,6 @@ class SQLite{
         [config.cardName, order, config.cardColor, config.deadline, config.paymentDate,]
     );
   }
-  /// 設定削除用
-  static Future<void> deleteSetting(int id) async {
-    final db = await database;
-    await db.delete(
-      'setting',
-      where: "id = ?",
-      whereArgs: [id],
-    );
-  }
   // カードの数取得用
   static Future<int> countSetting() async {
     final db = await database;
@@ -286,6 +267,15 @@ class SQLite{
     await db.rawUpdate(
       'UPDATE setting SET cardName = ?, cardOrder = ?, cardColor = ?, deadline = ?, paymentDate = ? WHERE id = ?',
       [config.cardName, config.cardOrder, config.cardColor, config.deadline, config.paymentDate, config.id,]
+    );
+  }
+  /// 設定削除用
+  static Future<void> deleteSetting(int id) async {
+    final db = await database;
+    await db.delete(
+      'setting',
+      where: "id = ?",
+      whereArgs: [id],
     );
   }
 }

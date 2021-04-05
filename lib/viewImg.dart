@@ -11,12 +11,8 @@ class ViewImg extends StatefulWidget {
 class _ViewImgState extends State<ViewImg> {
   @override
   Widget build(BuildContext context) {
-    AppBar appBar = AppBar(title: Text('クレジットマネージャ'),); // タイトルテキスト
-    double appheight = appBar.preferredSize.height;
-    final double deviceHeight = MediaQuery.of(context).size.height - appheight;
-    final double deviceWidth = MediaQuery.of(context).size.width;
     return Scaffold(
-      appBar: appBar,
+      appBar: AppBar(title: Text('クレジットマネージャ'),), // タイトルテキスト
       /******************************************************* AppBar*/
       body: ListView.separated(
         itemCount: widget.imgs.length,

@@ -26,5 +26,29 @@ class AppTheme {
       brightness: Brightness.light,
     );
   }
+  static ThemeData theme_konoha() {
+    return ThemeData(
+      primaryColor: MyColor.konoha[900],
+      accentColor: MyColor.konoha[500],
+      selectedRowColor: MyColor.konoha[50],
+      primaryColorDark: MyColor.konoha[800],
+      backgroundColor: MyColor.konoha[700],
+      primaryColorLight: MyColor.konoha[100],
+      focusColor: MyColor.konoha[200],
+      brightness: Brightness.light,
+    );
+  }
+  static ThemeData theme_dark() {
+    return ThemeData(
+      primaryColor: MyColor.dark[900],
+      accentColor: MyColor.dark[500],
+      selectedRowColor: MyColor.dark[50],
+      primaryColorDark: MyColor.dark[800],
+      backgroundColor: MyColor.dark[700],
+      primaryColorLight: MyColor.dark[100],
+      focusColor: MyColor.dark[200],
+      brightness: Brightness.dark,
+    );
+  }
 
 }

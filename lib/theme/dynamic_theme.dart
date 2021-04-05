@@ -43,6 +43,8 @@ class DynamicThemeState extends State<DynamicTheme> {
   static Map<ThemeType, ThemeData> themeMap = {
     ThemeType.ROSE: AppTheme.theme_rose(),
     ThemeType.SKY: AppTheme.theme_sky(),
+    ThemeType.KONOHA: AppTheme.theme_konoha(),
+    ThemeType.DARK: AppTheme.theme_dark(),
   };
 
   void _initVariables() {

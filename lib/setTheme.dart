@@ -11,59 +11,64 @@ class SetTheme extends StatefulWidget {
 class _SetThemeState extends State<SetTheme> {
   @override
   Widget build(BuildContext context) {
-    AppBar appBar = AppBar(title: Text('クレジットマネージャ'),); // タイトルテキスト
-    double appheight = appBar.preferredSize.height; //LayoutBuilderを使うとキーボード出した時縮む
-    final double deviceHeight = MediaQuery.of(context).size.height - appheight;
-    final double deviceWidth = MediaQuery.of(context).size.width;
+    double deviceHeight;
+    double deviceWidth;
 
     return Scaffold(
-      appBar: appBar,
+      appBar: AppBar(title: Text('クレジットマネージャ'),),
       /******************************************************* AppBar*/
-      body: ListView.builder(
-        itemCount: MyColor.themeName.length,
-        itemBuilder: (context, index) {
-          ThemeType themeType = ThemeType.values()[index];
-          String value = themeType.toString();
-          return InkWell(
-            child: Container(
-                height: deviceHeight * 0.07,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: <Widget>[
-                    // テーマ名
-                    Container(
-                      width: deviceWidth * 0.5,
-                      padding: EdgeInsets.only(left: deviceWidth * 0.01),
-                      child: Text(
-                        MyColor.themeName[index],
-                        textAlign: TextAlign.left,
-                        style: TextStyle(fontSize: deviceHeight * 0.025,),
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          deviceHeight = constraints.maxHeight;
+          deviceWidth = constraints.maxWidth;
+
+          return ListView.separated(
+            itemCount: MyColor.themeName.length,
+            itemBuilder: (context, index) {
+              ThemeType themeType = ThemeType.values()[index];
+              String value = themeType.toString();
+              return InkWell(
+                child: Container(
+                  height: 56.0,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: <Widget>[
+                      Container(
+                        padding: EdgeInsets.only(left: 15,right: 15,),
+                        child: Text(
+                          MyColor.themeName[index],
+                          textAlign: TextAlign.left,
+                          style: TextStyle(fontSize: 16,),
+                        ),
                       ),
-                    ),
-                    // 間埋める用
-                    Container(width: deviceWidth * 0.3,),
-                    // サンプル表示
-                    Container(
-                      width: deviceWidth * 0.2,
-                      padding: EdgeInsets.only(right: deviceWidth * 0.01),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: <Widget>[
-                          Icon(Icons.stop_circle,color: MyColor.themeColor[index][900],),
-                          Icon(Icons.stop_circle,color: MyColor.themeColor[index][500],),
-                          Icon(Icons.stop_circle,color: MyColor.themeColor[index][50],),
-                        ],
+                      Expanded(child: Container(),), // 隙間いっぱい埋める
+                      Container(
+                        alignment: Alignment.centerRight,
+                        padding: EdgeInsets.only(left: 18,right: 15,),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: <Widget>[
+                            Icon(Icons.stop_circle,color: MyColor.themeColor[index][900],),
+                            Icon(Icons.stop_circle,color: MyColor.themeColor[index][500],),
+                            Icon(Icons.stop_circle,color: MyColor.themeColor[index][50],),
+                          ],
+                        ),
                       ),
-                    ),
-                  ],
-                )
-            ),
-            onTap: () async{
-              DynamicTheme.of(context).setTheme(ThemeType.of(value));
-              Navigator.pop(context);
+                    ],
+                  ),
+                ),
+                onTap: () async{
+                  DynamicTheme.of(context).setTheme(ThemeType.of(value));
+                  Navigator.pop(context);
+                },
+              );
+            },
+            separatorBuilder: (context, index){
+              return Divider(height:3,);
             },
           );
-        },
+        }
       ),
     );
   }

@@ -7,36 +7,36 @@ import 'package:money_manager/main.dart';
 import 'package:money_manager/sqlite.dart';
 import 'package:money_manager/processing.dart';
 
-class Add extends StatefulWidget {
+class EditMoney extends StatefulWidget {
   Money money;
-  Add({Key key, this.money}) : super(key: key);
+  EditMoney({Key key, this.money}) : super(key: key);
   @override
-  _AddState createState() => _AddState();
+  _EditMoneyState createState() => _EditMoneyState();
 }
 
-class _AddState extends State<Add> {
+class _EditMoneyState extends State<EditMoney> {
   final _picker = ImagePicker();
   List<String> _images = List<String>();
   int _year;
   int _month;
   int _days;
-  var myController = TextEditingController();
+  var moneyController = TextEditingController();
   String _error;
 
   @override
   void dispose() {
-    myController.dispose();
+    moneyController.dispose();
     super.dispose();
   }
   @override
   void initState() {
-    if(widget.money.id != 0){
+    if(widget.money.id != 0){ // 編集の時は元の値を入れる
       _year = int.parse(widget.money.date.split('-')[0]);
       _month = int.parse(widget.money.date.split('-')[1]);
       _days = int.parse(widget.money.date.split('-')[2]);
       _images.addAll(widget.money.image);
-      myController = TextEditingController(text: widget.money.money.toString());
-    }else{
+      moneyController = TextEditingController(text: widget.money.money.toString());
+    }else{ // 追加の時は日時を今日の日付で初期化する
       _year = DateTime.now().year;
       _month = DateTime.now().month;
       _days = DateTime.now().day;
@@ -54,118 +54,128 @@ class _AddState extends State<Add> {
       appBar: appBar,
       /******************************************************* AppBar*/
       body: SingleChildScrollView(
-            reverse: true, // キーボード表示したら(画面が足りなくなったら)スクロール
-            child: GestureDetector(
-              onTap: () => FocusScope.of(context).unfocus(), // キーボード外の画面タップでキーボードを閉じる
-              child: Container(
-                height: deviceHeight,
-                child: Column(
+        reverse: true, // キーボード表示したら(画面が足りなくなったら)スクロール
+        child: GestureDetector(
+          onTap: () => FocusScope.of(context).unfocus(), // キーボード外の画面タップでキーボードを閉じる
+          child: Container(
+            color: Colors.transparent, // なぜかcolorを指定しておかないとFocusScope.of(context).unfocus()が機能しない
+            height: deviceHeight,
+            child: Column(
+              children: <Widget>[
+                Stack( // 重ねるレイアウト
                   children: <Widget>[
-                    Stack( // 重ねるレイアウト
-                      children: <Widget>[
-                        /** 写真 */
-                        Container(
-                          height: deviceHeight * 0.4,
-                          color: Colors.grey[300],
-                          child: buildGridView(context,deviceWidth, deviceHeight * 0.4),
-                        ),
-                        /** ボタン */
-                        Container(
-                          height: deviceHeight * 0.4,
-                          padding: EdgeInsets.all(5),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment.end,
-                            children: <Widget>[
-                              FlatButton(
-                                onPressed: _getImageFromCamera,
-                                color: Color.fromARGB(150, 100, 100, 100),
-                                height: deviceHeight * 0.4 * 0.2,
-                                minWidth: deviceHeight * 0.4 * 0.25,
-                                padding: EdgeInsets.all(5),
-                                child: Icon(Icons.camera_alt),
-                                shape: CircleBorder(),
-                              ),
-                              // 選択
-                              FlatButton(
-                                onPressed: _getImageFromGallery,
-                                color: Color.fromARGB(150, 100, 100, 100),
-                                height: deviceHeight * 0.4 * 0.2,
-                                minWidth: deviceHeight * 0.4 * 0.25,
-                                padding: EdgeInsets.all(5),
-                                child: Icon(Icons.insert_photo),
-                                shape: CircleBorder(),
-                              ),
-                            ],
+                    /** 写真 */
+                    Container(
+                      height: deviceHeight * 0.4,
+                      color: Colors.grey[300],
+                      child: buildGridView(context,deviceWidth, deviceHeight * 0.4),
+                    ),
+                    /** 写真追加ボタン */
+                    Container(
+                      height: deviceHeight * 0.4,
+                      padding: EdgeInsets.all(5),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: <Widget>[
+                          FlatButton( /// カメラ起動
+                            onPressed: _getImageFromCamera,
+                            color: Color.fromARGB(150, 100, 100, 100),
+                            height: deviceHeight * 0.4 * 0.2,
+                            minWidth: deviceHeight * 0.4 * 0.25,
+                            padding: EdgeInsets.all(5),
+                            child: Icon(Icons.camera_alt),
+                            shape: CircleBorder(),
                           ),
-                        ),
-                      ],
+                          FlatButton( /// アルバムから選ぶ
+                            onPressed: _getImageFromGallery,
+                            color: Color.fromARGB(150, 100, 100, 100),
+                            height: deviceHeight * 0.4 * 0.2,
+                            minWidth: deviceHeight * 0.4 * 0.25,
+                            padding: EdgeInsets.all(5),
+                            child: Icon(Icons.insert_photo),
+                            shape: CircleBorder(),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                /** カード名 */
+                Stack(
+                  children: [
+                    Container(
+                      height: 32.0,
+                      decoration: BoxDecoration(
+                          border: Border(bottom: BorderSide(color: cardColor[config[widget.money.cid].cardColor], width: 8,))
+                      ),
                     ),
                     Container(
-                      color: Theme.of(context).selectedRowColor,
+                      height: 32.0,
                       alignment: Alignment.center,
                       child: Text(
                         config[widget.money.cid].cardName,
                         style: TextStyle(fontSize: deviceHeight * 0.03,),
                       ),
                     ),
-                    /** 日付ドロップダウンリスト */
-                    _dropdownDate(),
-                    /** 金額入力 */
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: <Widget>[
-                        Container(
-                          width: deviceWidth - deviceHeight * 0.05,
-                          child: TextField(
-                            controller: myController,
-                            decoration: new InputDecoration(labelText: "金額を入力してください。", labelStyle: TextStyle(fontSize: deviceHeight * 0.02,),),
-                            style: TextStyle(fontSize: deviceHeight * 0.04,),
-                            textAlign: TextAlign.right,
-                            keyboardType: TextInputType.number,
-                          ),
-                        ),
-                        Container(
-                          width: deviceHeight * 0.04,
-                          padding: EdgeInsets.only(bottom: deviceHeight * 0.01,),
-                          child: Text("円", style: TextStyle(fontSize: deviceHeight * 0.04,),),
-                        ),
-                      ],
+                  ],
+                ),
+                /** 日付ドロップダウンリスト */
+                _dropdownDate(),
+                /** 金額入力 */
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: <Widget>[
+                    Container(
+                      width: deviceWidth - deviceHeight * 0.05,
+                      child: TextField(
+                        controller: moneyController,
+                        decoration: new InputDecoration(labelText: "金額を入力してください。", labelStyle: TextStyle(fontSize: deviceHeight * 0.02,),),
+                        style: TextStyle(fontSize: deviceHeight * 0.04,),
+                        textAlign: TextAlign.right,
+                        keyboardType: TextInputType.number,
+                      ),
                     ),
-                    /** 確定ボタン */
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        FlatButton(
-                          color: Theme.of(context).accentColor,
-                          padding: EdgeInsets.all(10),
-                          minWidth: deviceWidth * 0.20,
-                          child: Icon(Icons.check),
-                          onPressed: () async{
-                            Money _money = Money(
-                                image: _images,
-                                money: myController.text == "" ? 0 : int.parse(myController.text),
-                                date: _year.toString()+'-'+processing.doubleDigit(_month)+'-'+processing.doubleDigit(_days),
-                                cid: widget.money.cid
-                            );
-                            if(widget.money.id == 0){
-                              await SQLite.insertMoney(_money);
-                            }else{
-                              _money.id = widget.money.id;
-                              await SQLite.updateMoney(_money);
-                            }
-                            Navigator.pop(context);
-                          },
-                        )
-                      ],
+                    Container(
+                      width: deviceHeight * 0.04,
+                      padding: EdgeInsets.only(bottom: deviceHeight * 0.01,),
+                      child: Text("円", style: TextStyle(fontSize: deviceHeight * 0.04,),),
                     ),
                   ],
                 ),
-              ),
-
+                /** 確定ボタン */
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    FlatButton(
+                      color: Theme.of(context).accentColor,
+                      padding: EdgeInsets.all(10),
+                      minWidth: deviceWidth * 0.20,
+                      child: Icon(Icons.check),
+                      onPressed: () async{
+                        Money _money = Money(
+                            image: _images,
+                            money: moneyController.text == "" ? 0 : int.parse(moneyController.text),
+                            date: _year.toString()+'-'+processing.doubleDigit(_month)+'-'+processing.doubleDigit(_days),
+                            cid: widget.money.cid
+                        );
+                        if(widget.money.id == 0){
+                          await SQLite.insertMoney(_money);
+                        }else{
+                          _money.id = widget.money.id;
+                          await SQLite.updateMoney(_money);
+                        }
+                        Navigator.pop(context);
+                      },
+                    )
+                  ],
+                ),
+              ],
             ),
           ),
+        ),
+      ),
     );
   }
   /// 写真選択(カメラなし)
@@ -340,45 +350,6 @@ class _AddState extends State<Add> {
     }
 
   }
-
-  /// 写真選択(カメラあり)未使用
-  // Future<void> cameraAssets() async {
-  //   setState(() {
-  //     // images = List<Asset>();
-  //     _images = List<String>();
-  //   });
-  //
-  //   List<Asset> resultList;
-  //   String error;
-  //
-  //   try {
-  //     resultList = await MultiImagePicker.pickImages(
-  //       maxImages: 5, /// 選択できる最大枚数指定
-  //       enableCamera: true,
-  //       cupertinoOptions: CupertinoOptions(
-  //         autoCloseOnSelectionLimit: true,
-  //       ),
-  //     );
-  //   } on Exception catch (e) {
-  //     error = e.toString();
-  //   }
-  //
-  //   if (!mounted) return;
-  //
-  //   List<String> img64 = [];
-  //
-  //   for(int i = 0; i < resultList.length; i++){
-  //     var bytedata = await resultList[i].getByteData();
-  //     List<int> imageData = bytedata.buffer.asUint8List();
-  //     img64.add(base64Encode(imageData));
-  //   }
-  //
-  //   setState(() {
-  //     _images = img64;
-  //     if (error == null) _error = 'No Error Dectected';
-  //   });
-  // }
-
   /// 日付選択ドロップダウン
   Widget _dropdownDate(){
     // リストを用意
@@ -390,55 +361,53 @@ class _AddState extends State<Add> {
       Y.add(i);
     /** 年 */
     var widgetY  =
-      DropdownButton<int>(
-        value: _year,
-        icon: Icon(Icons.arrow_drop_down),
-        iconSize: 30,
-        elevation: 16,
-        onChanged: (newValue) {
-          setState(() {
-            _year = newValue;
-            _month = null; // 値があわることがあるため一旦nullに TODO
-            _days = null;
-          });
-        },
-        // Yをセット
-        items: Y.map<DropdownMenuItem<int>>((int value) {
-          return DropdownMenuItem<int>(
-            value: value,
-            child: Text(value.toString()),
-          );
-        }).toList(),
-      );
+    DropdownButton<int>(
+      value: _year,
+      icon: Icon(Icons.arrow_drop_down),
+      iconSize: 30,
+      elevation: 16,
+      onChanged: (newValue) {
+        setState(() {
+          _year = newValue;
+          _days = processing.legalDay(_year, _month, _days); // 月末の整合性をとる
+        });
+      },
+      // Yをセット
+      items: Y.map<DropdownMenuItem<int>>((int value) {
+        return DropdownMenuItem<int>(
+          value: value,
+          child: Text(value.toString()),
+        );
+      }).toList(),
+    );
     /** 月 */
     var widgetM =
-      DropdownButton<int>(
-        value: _month,
-        icon: Icon(Icons.arrow_drop_down),
-        iconSize: 30,
-        elevation: 16,
-        onChanged: (newValue) {
-          setState(() {
-            _month = newValue;
-            _days = null; // 値があわることがあるため一旦nullに TODO
-          });
-        },
-        // Mをセット
-        items: M.map<DropdownMenuItem<int>>((int value) {
-          return DropdownMenuItem<int>(
-            value: value,
-            child: Text(value.toString()),
-          );
-        }).toList(),
-      );
+    DropdownButton<int>(
+      value: _month,
+      icon: Icon(Icons.arrow_drop_down),
+      iconSize: 30,
+      elevation: 16,
+      onChanged: (newValue) {
+        setState(() {
+          _month = newValue;
+          _days = processing.legalDay(_year, _month, _days); // 月末の整合性をとる
+        });
+      },
+      // Mをセット
+      items: M.map<DropdownMenuItem<int>>((int value) {
+        return DropdownMenuItem<int>(
+          value: value,
+          child: Text(value.toString()),
+        );
+      }).toList(),
+    );
 
     // 選択されている月によって値が変わる
     switch(_month){
       case 2:case 4:case 6:case 9:case 11:
-        // 2月
-        if(_month == 2){
-          // 閏年
+        if(_month == 2){ /// 2月
           bool flg = false;
+          // 閏年か判定
           if(_year % 4 == 0){
             if(_year % 100 == 0){
               if(_year % 400 == 0)
@@ -447,22 +416,21 @@ class _AddState extends State<Add> {
               flg = true;
             }
           }
-          if(flg){
+          if(flg){ /// 閏年
             for(int i = 1; i <= 29; i++)
               D.add(i);
-          // 閏年じゃない
-          }else{
+
+          }else{ /// 閏年じゃない
             for(int i = 1; i <= 28; i++)
               D.add(i);
           }
-        // 2月じゃない
-        }else{
+        }else{ /// 2月じゃない
           for(int i = 1; i <= 30; i++)
             D.add(i);
         }
         break;
       default:
-        // 31日の月
+        /// 31日の月
         for(int i = 1; i <= 31; i++)
           D.add(i);
         break;
@@ -488,6 +456,6 @@ class _AddState extends State<Add> {
       }).toList(),
     );
     /** 横に3つ並べる */
-    return Row(children: <Widget>[widgetY,widgetM,widgetD,]);
+    return Row(children: <Widget>[widgetY, widgetM, widgetD,]);
   }
 }
