@@ -20,7 +20,7 @@ class _RecordState extends State<Record> {
   Future<void> initialize() async { // 非同期処理(List取得)
     _moneyList = await SQLite.getMoneys(now.year, now.month, now.day);
     totalMoney = 0;
-    for(int i = 0; i < _moneyList.length; i++){
+    for(int i = 0; i < _moneyList[widget.nowid].length; i++){
       totalMoney += _moneyList[widget.nowid][i].money;
     }
   }
@@ -226,7 +226,6 @@ class _RecordState extends State<Record> {
     return Column(
       children: <Widget>[
         Container(
-          // color: Colors.grey[100],
           color: Theme.of(context).brightness == Brightness.light ? Colors.grey[100] : Colors.grey[900],
           alignment: Alignment.center,
           child: Text(
