@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:money_manager/sqlite.dart';
+import 'package:money_manager/processing.dart';
 import 'package:money_manager/main.dart';
 import 'package:money_manager/viewImg.dart';
 import 'package:money_manager/editMoney.dart';
@@ -42,6 +43,8 @@ class _RecordState extends State<Record> {
               return Center(child: CircularProgressIndicator(),);
             // 非同期処理完了
             int correct = now.day <= config[widget.nowid].deadline ? 1 : 2;
+            int correctS = config[widget.nowid].deadline == 32 ? correct-1 : correct-2;
+            int correctE = correct-1;
             return Stack(
                 children: <Widget>[
                   Column(
@@ -88,8 +91,10 @@ class _RecordState extends State<Record> {
                                       style: TextStyle(fontSize: deviceHeight * 0.025, fontStyle: FontStyle.italic, color: Colors.white, ),
                                     ),
                                     Text(
-                                      "("+DateTime(now.year,now.month+correct-2).month.toString()+"月"+(config[widget.nowid].deadline+1).toString()+"日〜"+
-                                          DateTime(now.year,now.month+correct-1).month.toString()+"月"+(config[widget.nowid].deadline).toString()+"日)",
+                                      "("+DateTime(now.year,now.month+correctS).month.toString()+"月"+
+                                          (config[widget.nowid].deadline == 32 ? 1 : config[widget.nowid].deadline+1).toString()+"日〜"+
+                                          DateTime(now.year,now.month+correctE).month.toString()+"月"+
+                                          (processing.legalDay(now.year,now.month+correctE,config[widget.nowid].deadline)).toString()+"日)",
                                       style: TextStyle(fontSize: deviceHeight * 0.02, fontStyle: FontStyle.italic, color: Colors.white, height: deviceHeight * 0.001),
                                     ),
                                   ]
@@ -270,7 +275,7 @@ class _RecordState extends State<Record> {
         child: Stack(
             children: <Widget>[
               DefaultTextStyle(
-                style: new TextStyle(color: Colors.black),
+                style: Theme.of(context).brightness == Brightness.light ? TextStyle(color: Colors.black) : TextStyle(color: Colors.white),
                 overflow: TextOverflow.ellipsis,
                 maxLines: 1,
                 child: Container(

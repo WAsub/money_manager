@@ -123,15 +123,25 @@ class SQLite{
       list.add([]);
     }
     for(int j = 1; j < config.length; j++){
-      if(day <= config[j].deadline){
+      if(config[j].deadline == 32){
+        ds =  DateTime(year, month);
+        de =  DateTime(year, month);
+      }else if(day <= config[j].deadline){
         ds =  DateTime(year, month - 1);
         de =  DateTime(year, month);
       }else{
         ds =  DateTime(year, month);
         de =  DateTime(year, month + 1);
       }
-      String Dstart = ds.year.toString()+'-'+processing.doubleDigit(ds.month)+'-'+processing.doubleDigit(config[j].deadline+1);
-      String Dend = de.year.toString()+'-'+processing.doubleDigit(de.month)+'-'+processing.doubleDigit(config[j].deadline);
+
+      String Dstart = ds.year.toString()+'-'+processing.doubleDigit(ds.month)+'-'+
+          processing.doubleDigit(
+              config[j].deadline == 32 ? 1 : config[j].deadline+1
+          );
+      String Dend = de.year.toString()+'-'+processing.doubleDigit(de.month)+'-'+
+          processing.doubleDigit(
+              processing.legalDay(de.year, de.month, config[j].deadline)
+          );
 
       final Database db = await database;
       // リストを取得

@@ -12,6 +12,7 @@ class EditCard extends StatefulWidget {
 class _EditCardState extends State<EditCard> {
   var cardnameController = TextEditingController();
   var deadlineController = TextEditingController();
+  var deadlinecheck = false;
   var paymentDateController = TextEditingController();
   @override
   void dispose() {
@@ -24,7 +25,11 @@ class _EditCardState extends State<EditCard> {
   void initState() {
     if(widget.conf.id != 0){
       cardnameController = TextEditingController(text: widget.conf.cardName);
-      deadlineController = TextEditingController(text: widget.conf.deadline.toString());
+      if(widget.conf.deadline == 32){
+        deadlinecheck = true;
+      }else{
+        deadlineController = TextEditingController(text: widget.conf.deadline.toString());
+      }
       paymentDateController = TextEditingController(text: widget.conf.paymentDate.toString());
     }else{
       cardnameController = TextEditingController(text: "マイカード");
@@ -148,6 +153,16 @@ class _EditCardState extends State<EditCard> {
                         child: Text("締め日 :", style: TextStyle(fontSize: 16,)),
                       ),
                       Expanded(child: Container(),), // 隙間いっぱい埋める
+                      Checkbox(
+                        activeColor: Colors.blueAccent,
+                        value: deadlinecheck,
+                        onChanged: (bool value) {
+                          setState(() {
+                          deadlinecheck = value;
+                          });
+                        }
+                      ),
+                      Text("月末締め"),
                       Container(
                         alignment: Alignment.centerRight,
                         padding: EdgeInsets.only(left: 18,right: 15,),
@@ -208,9 +223,10 @@ class _EditCardState extends State<EditCard> {
                       Setting set = Setting(
                         cardName: cardnameController.text == "" ? "マイカード" : cardnameController.text,
                         cardColor: widget.conf.cardColor,
-                        deadline: deadlineController.text == "" ||
-                            (int.parse(deadlineController.text) < 1 || int.parse(deadlineController.text) > 28)
-                            ? 25 : int.parse(deadlineController.text),
+                        deadline: deadlinecheck ? 32 : // 月末締め
+                                    deadlineController.text == "" || // 値が空か1〜28じゃない
+                                    (int.parse(deadlineController.text) < 1 || int.parse(deadlineController.text) > 28) ? 25 :
+                                    int.parse(deadlineController.text), // そのまま
                         paymentDate: paymentDateController.text == "" ||
                             (int.parse(paymentDateController.text) < 1 || int.parse(paymentDateController.text) > 28)
                             ? 10 : int.parse(paymentDateController.text),

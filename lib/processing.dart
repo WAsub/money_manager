@@ -38,6 +38,8 @@ class processing{
         break;
       default:
         /// 31日の月
+        if(D == 32)
+          newD = 31;
         break;
     }
     return newD;
