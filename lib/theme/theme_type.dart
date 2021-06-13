@@ -24,7 +24,9 @@ class ThemeType {
 
 
   static ThemeType of(String theme) {
-    return ThemeType.values().firstWhere((e) => e.toString() == theme);
+    var firstWhere =
+        ThemeType.values().firstWhere((e) => e.toString() == theme);
+    return firstWhere;
   }
 
   String toString() {

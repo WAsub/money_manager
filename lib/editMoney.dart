@@ -174,7 +174,7 @@ class _EditMoneyState extends State<EditMoney> {
                             money: moneyController.text == "" ? 0 : int.parse(moneyController.text),
                             memo: memoController.text == "" ? "" : memoController.text.length <= 20 ? memoController.text : memoController.text.substring(0, 20),
                             date: _year.toString()+'-'+processing.doubleDigit(_month)+'-'+processing.doubleDigit(_days),
-                            cid: widget.money.cid
+                            cid: config[widget.money.cid].id
                         );
                         if(widget.money.id == 0){
                           await SQLite.insertMoney(_money);
